@@ -29,7 +29,6 @@ namespace WindowsFormsApp1
             foreach (Process p in processCollection)
             {
                 MyProcessList.Add(p.ProcessName);
-
             }
             MyProcessList.Sort();
             listBox1.DataSource = MyProcessList;
@@ -47,7 +46,6 @@ namespace WindowsFormsApp1
             comboBox1.SelectedIndex = 3; //default to 5 min
         }
 
-
         private CancellationTokenSource _canceller;
 
         [DllImport("User32.dll")]
@@ -56,7 +54,6 @@ namespace WindowsFormsApp1
         static extern IntPtr GetForegroundWindow();
         private async void button1_Click(object sender, EventArgs e)
         {
-
             button1.Enabled = false;
             button2.Enabled = true;
             string curItem = listBox1.SelectedItem.ToString();
@@ -67,7 +64,6 @@ namespace WindowsFormsApp1
             {
                 do
                 {
-
                     Process p = Process.GetProcessesByName(curItem).FirstOrDefault();
                     if (p != null)
                     {
@@ -77,8 +73,6 @@ namespace WindowsFormsApp1
                         //SendKeys.SendWait(RandomString(1));
                         SendKeys.SendWait("+");
                         SetForegroundWindow(current);
-                        //500000 ~ 9minutes
-                        //240000 ~ 4 minutes
                         Thread.Sleep(time);
                     }
                     if (_canceller.Token.IsCancellationRequested)
@@ -88,7 +82,6 @@ namespace WindowsFormsApp1
             });
 
             _canceller.Dispose();
-
         }
         private void button2_Click(object sender, EventArgs e)
         {
@@ -97,26 +90,23 @@ namespace WindowsFormsApp1
             button1.Enabled = true;
         }
 
-        private int ConvertMin (int num)
+        private int ConvertMin(int num)
         {
-            if (num.Equals(1))
+            switch (num)
             {
-                return 60000;
+                // Values are in Milliseconds (1,3,5,10 min)
+                case 1:
+                    return 60000;
+                case 3:
+                    return 180000;
+                case 5:
+                    return 300000;
+                case 10:
+                    return 590000;
+                default:
+                    // default to 3 sec if combobox is set to 0
+                    return 3000;
             }
-            if (num.Equals(3))
-            {
-                return 180000;
-            }
-            if (num.Equals(5))
-            {
-                return 300000;
-            }
-            if (num.Equals(10))
-            {
-                return 590000;
-            }
-            // defualt to 3 sec if combobox is set to 0
-            return 3000;
         }
 
         private static Random random = new Random();
