@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,7 +23,7 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-            
+            this.Text = "Key Sender";
             Process[] processCollection = Process.GetProcesses();
             List<string> MyProcessList = new List<string>();
             foreach (Process p in processCollection)
@@ -34,7 +34,11 @@ namespace WindowsFormsApp1
             MyProcessList.Sort();
             listBox1.DataSource = MyProcessList;
             //Try to find RDP by default and highlight it
-            listBox1.SetSelected(listBox1.FindString("msrdc"), true);
+            int msrdc = listBox1.FindString("msrdc");
+            if (msrdc != -1)
+            {
+                listBox1.SetSelected(msrdc, true);
+            }
             comboBox1.Items.Add(0);
             comboBox1.Items.Add(1);
             comboBox1.Items.Add(3);
@@ -48,6 +52,8 @@ namespace WindowsFormsApp1
 
         [DllImport("User32.dll")]
         static extern int SetForegroundWindow(IntPtr point);
+        [DllImport("user32.dll")]
+        static extern IntPtr GetForegroundWindow();
         private async void button1_Click(object sender, EventArgs e)
         {
 
@@ -65,10 +71,12 @@ namespace WindowsFormsApp1
                     Process p = Process.GetProcessesByName(curItem).FirstOrDefault();
                     if (p != null)
                     {
-
+                        IntPtr current = GetForegroundWindow();
                         IntPtr h = p.MainWindowHandle;
                         SetForegroundWindow(h);
-                        SendKeys.SendWait(RandomString(1));
+                        //SendKeys.SendWait(RandomString(1));
+                        SendKeys.SendWait("+");
+                        SetForegroundWindow(current);
                         //500000 ~ 9minutes
                         //240000 ~ 4 minutes
                         Thread.Sleep(time);
@@ -80,13 +88,13 @@ namespace WindowsFormsApp1
             });
 
             _canceller.Dispose();
-            button1.Enabled = true;
-            button2.Enabled = false;
 
         }
         private void button2_Click(object sender, EventArgs e)
         {
             _canceller.Cancel();
+            button2.Enabled = false;
+            button1.Enabled = true;
         }
 
         private int ConvertMin (int num)
@@ -105,7 +113,7 @@ namespace WindowsFormsApp1
             }
             if (num.Equals(10))
             {
-                return 600000;
+                return 590000;
             }
             // defualt to 3 sec if combobox is set to 0
             return 3000;
